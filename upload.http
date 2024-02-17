@@ -1,0 +1,33 @@
+### Send POST request with json body
+POST localhost:8765/addNotes
+Content-Type: application/json
+
+{
+  "action": "addNotes",
+  "version": 6,
+  "params": {
+    "notes": [
+      {
+        "deckName": "Default",
+        "modelName": "Basic (and reversed card) with sound",
+        "fields": {
+          "Front": "front content",
+          "Back": "back content",
+          "Front audio": "Front audio"
+        },
+        "tags": [
+          "auto-generated"
+        ],
+        "audio": [
+          {
+            "filename": "mundo.mp3",
+            "data": "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",
+            "fields": [
+              "Front audio"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
