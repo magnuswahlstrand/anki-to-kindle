@@ -5,23 +5,24 @@ import (
 	"cloud.google.com/go/texttospeech/apiv1/texttospeechpb"
 	"context"
 	"encoding/base64"
-	"fmt"
 	"log"
 )
 
-func tts() {
+var client *texttospeech.Client
 
-	ctx := context.Background()
-	client, err := texttospeech.NewClient(ctx)
+func init() {
+	c, err := texttospeech.NewClient(context.Background())
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
-	defer client.Close()
+	client = c
+}
 
+func tts(word string) string {
 	// Build the request for the text you want to convert to speech
 	req := &texttospeechpb.SynthesizeSpeechRequest{
 		Input: &texttospeechpb.SynthesisInput{
-			InputSource: &texttospeechpb.SynthesisInput_Text{Text: "Mundo"},
+			InputSource: &texttospeechpb.SynthesisInput_Text{Text: word},
 		},
 		// Specify the voice and language code
 		Voice: &texttospeechpb.VoiceSelectionParams{
@@ -35,13 +36,10 @@ func tts() {
 	}
 
 	// Perform the text-to-speech request on the text input with the selected voice parameters and audio file type
-	resp, err := client.SynthesizeSpeech(ctx, req)
+	resp, err := client.SynthesizeSpeech(context.Background(), req)
 	if err != nil {
 		log.Fatalf("Failed to synthesize speech: %v", err)
 	}
 
-	encodedStr := base64.StdEncoding.EncodeToString(resp.AudioContent)
-	fmt.Println(encodedStr)
-
-	fmt.Println("Audio content written to file: output.mp3")
+	return base64.StdEncoding.EncodeToString(resp.AudioContent)
 }

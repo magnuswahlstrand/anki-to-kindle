@@ -1,1 +1,3 @@
-*/vocab.db
+*.private.env.json
+/db
+*.csv

@@ -1,14 +1,14 @@
 package main
 
 import (
+	"cloud.google.com/go/translate"
 	"context"
 	"database/sql"
-	"fmt"
+	"encoding/csv"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/text/language"
 	"log"
-
-	"cloud.google.com/go/translate"
+	"os"
 )
 
 const vocabDBPath = "db/vocab.db"
@@ -30,15 +30,14 @@ func main() {
 	defer db.Close()
 
 	// Prepare SQL query to select stem words for the specified vocabLanguage
-	query := `SELECT DISTINCT stem FROM WORDS WHERE lang = ? LIMIT 10`
-	rows, err := db.Query(query, vocabLanguage)
+	query := `SELECT DISTINCT stem FROM WORDS WHERE lang = ? LIMIT ?`
+	rows, err := db.Query(query, vocabLanguage, limit)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 
 	// Iterate over the rows and print each stem word
-	fmt.Println("Stem Words:")
 	stemmedWords := []string{}
 	for rows.Next() {
 		var stem string
@@ -68,17 +67,31 @@ func main() {
 		log.Fatalf("Failed to parse target vocabLanguage: %v", err)
 	}
 
-	words := []Translation{}
-	for i := 0; i < len(stemmedWords); i += 128 {
+	words := [][]string{}
+	for i := 0; i < len(stemmedWords); i += batchSize {
 		// Translate text
-		translations, err := client.Translate(ctx, stemmedWords[i:min(i+128, len(stemmedWords))], targetLang, nil)
+		translations, err := client.Translate(ctx, stemmedWords[i:min(i+batchSize, len(stemmedWords))], targetLang, nil)
 		if err != nil {
 			log.Fatalf("Failed to translate words: %v", err)
 		}
 
 		// Print the translations
-		for i, translation := range translations {
-			words = append(words, Translation{Word: stemmedWords[i], Translation: translation.Text})
+		for j, t := range translations {
+			t := t
+			words = append(words, []string{stemmedWords[i+j], t.Text})
 		}
 	}
+
+	f, err := os.OpenFile("intermediate.csv", os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	w := csv.NewWriter(f)
+	if err := w.WriteAll(words); err != nil {
+		log.Fatal(err)
+	}
 }
+
+const limit = 1000
+const batchSize = 128
