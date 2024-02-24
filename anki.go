@@ -51,20 +51,29 @@ func main() {
 	}
 
 	// Load words from intermediate.csv
-	words := [][]string{}
+	words := []Def{}
 	f, err := os.Open("intermediate.csv")
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
 	r := csv.NewReader(f)
+	r.Comma = ';'
 	//i := 0
 	for {
 		record, err := r.Read()
 		if err != nil {
 			break
 		}
-		words = append(words, record)
+
+		d := Def{
+			Word:            record[0],
+			FirstDefinition: record[1],
+			//JoinedDefinitions: "",
+			Category: Category(record[2]),
+			Gender:   Gender(record[3]),
+		}
+		words = append(words, d)
 		//i++
 		//if i > 10 {
 		//	break
@@ -77,8 +86,8 @@ func main() {
 			DeckName:  deckName,
 			ModelName: modelName,
 		}
-		note.Fields.Front = w[0]
-		note.Fields.Back = w[1]
+		note.Fields.Front = w.Front()
+		note.Fields.Back = w.Back()
 		note.Fields.FrontAudio = "" //w[0] + ".mp3"
 		note.Tags = []string{
 			"kindle-to-anki",
@@ -88,8 +97,8 @@ func main() {
 
 		note.Audio = []Audio{
 			{
-				Filename: w[0] + ".mp3",
-				Data:     tts(w[0]),
+				Filename: w.Word + ".mp3",
+				Data:     tts(w.Word),
 				Fields:   []string{"Front audio"},
 			},
 		}
