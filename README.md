@@ -4,6 +4,8 @@
 * [x] Add colors to verbs/nouns
 * [ ] Handle darkmode in anki
 * [ ] Define global classes in Anki?
+* [ ] Mark verbs as -er, -ir, -ar
+* [ ] Source words from a file
 
 <style>
     .a { color: rgb(255, 225, 25)}

@@ -58,7 +58,7 @@ func main() {
 	}
 	defer f.Close()
 	r := csv.NewReader(f)
-	r.Comma = ';'
+	//r.Comma = ';'
 	//i := 0
 	for {
 		record, err := r.Read()
