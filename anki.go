@@ -3,6 +3,9 @@ package main
 import (
 	"encoding/csv"
 	"encoding/json"
+	"fmt"
+	"io"
+	"log"
 	"os"
 	"time"
 )
@@ -59,26 +62,24 @@ func main() {
 	defer f.Close()
 	r := csv.NewReader(f)
 	//r.Comma = ';'
-	//i := 0
 	for {
 		record, err := r.Read()
-		if err != nil {
+		if err == io.EOF {
 			break
+		} else if err != nil {
+			log.Fatal(err)
 		}
 
 		d := Def{
-			Word:            record[0],
+			word:            record[0],
 			FirstDefinition: record[1],
 			//JoinedDefinitions: "",
 			Category: Category(record[2]),
 			Gender:   Gender(record[3]),
 		}
 		words = append(words, d)
-		//i++
-		//if i > 10 {
-		//	break
-		//}
 	}
+	fmt.Printf("Found %d words\n", len(words))
 
 	//words := [][]string{{"mundo", "world"}}
 	for _, w := range words {
@@ -97,8 +98,8 @@ func main() {
 
 		note.Audio = []Audio{
 			{
-				Filename: w.Word + ".mp3",
-				Data:     tts(w.Word),
+				Filename: w.word + ".mp3",
+				Data:     tts(w.WordWithPrefix()),
 				Fields:   []string{"Front audio"},
 			},
 		}

@@ -69,7 +69,7 @@ const (
 )
 
 type Def struct {
-	Word              string
+	word              string
 	FirstDefinition   string
 	JoinedDefinitions string
 	Category          Category
@@ -79,20 +79,27 @@ type Def struct {
 var baseNounColor = "200, 200, 200"
 
 func (d Def) Front() string {
-	var prefix string
 	var nounColor string
 	if d.Category == Noun {
 		switch d.Gender {
 		case "feminine":
-			prefix = "la "
 			nounColor = "255, 105, 180"
 		case "masculine":
-			prefix = "el "
 			nounColor = "0, 178, 255"
 		}
 	}
 
-	return colorize(prefix+d.Word, d.Category, nounColor)
+	return colorize(d.WordWithPrefix(), d.Category, nounColor)
+}
+
+func (d Def) WordWithPrefix() string {
+	if d.Category == Noun && d.Gender == Feminine {
+		return "la " + d.word
+	} else if d.Category == Noun && d.Gender == Masculine {
+		return "el " + d.word
+	} else {
+		return d.word
+	}
 }
 
 func colorize(word string, category Category, nounColor string) string {
@@ -147,7 +154,7 @@ func getWordDefinition(word string) (Def, error) {
 	}
 
 	d := Def{
-		Word:              topDefinition.Hwi.Hw,
+		word:              topDefinition.Hwi.Hw,
 		Category:          parseCategory(topDefinition.Fl),
 		Gender:            parseGender(topDefinition.Fl),
 		FirstDefinition:   topDefinition.Shortdef[0],
@@ -199,7 +206,7 @@ func Translate2(stemmedWords []string) [][]string {
 			fmt.Println(err)
 			continue
 		}
-		words = append(words, []string{def.Word, def.FirstDefinition, string(def.Category), string(def.Gender), def.JoinedDefinitions})
+		words = append(words, []string{def.word, def.FirstDefinition, string(def.Category), string(def.Gender), def.JoinedDefinitions})
 	}
 	return words
 }
