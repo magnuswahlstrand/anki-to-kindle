@@ -18,8 +18,8 @@ type Translation struct {
 }
 
 func main() {
-	stemmedWords, err := WordsFromList()
-	//stemmedWords, err := WordsFromDb()
+	//stemmedWords, err := WordsFromList()
+	stemmedWords, err := WordsFromDb()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,7 +27,7 @@ func main() {
 	//words := GoogleTranslate(stemmedWords)
 	words := Translate2(stemmedWords)
 
-	f, err := os.OpenFile("intermediate.csv", os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile("intermediate.csv", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
